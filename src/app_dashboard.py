@@ -22,7 +22,7 @@ from train_openvino_model import SimpleFatigueClassifier
 
 # Page Config
 st.set_page_config(
-    page_title="RehabArm AI - Tele-Rehab Dashboard",
+    page_title="RehabArm AI Dashboard",
     page_icon="🦾",
     layout="wide"
 )
