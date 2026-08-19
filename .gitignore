@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Assets and image files (keep locally only)
+assets/
+images/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.webp
+
+# Documents & PDF
+*.pdf
+*.docx
+*.doc
+
+# Python cache & temp
+.pytest_cache/
+.env
+.venv
+env/
+venv/

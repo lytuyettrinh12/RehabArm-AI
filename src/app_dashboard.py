@@ -10,12 +10,11 @@ import joblib
 import pickle
 import base64
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IMAGE_PATH = os.path.join(PROJECT_ROOT, "assets", "anatomical_hologram_arm.jpg")
-B64_IMAGE = ""
-if os.path.exists(IMAGE_PATH):
-    with open(IMAGE_PATH, "rb") as img_file:
-        B64_IMAGE = base64.b64encode(img_file.read()).decode('utf-8')
+try:
+    from arm_b64 import HOLOGRAM_ARM_B64
+    B64_IMAGE = HOLOGRAM_ARM_B64
+except ImportError:
+    B64_IMAGE = ""
 
 from signal_processing import SignalProcessor, calculate_effort_score
 from train_openvino_model import SimpleFatigueClassifier
