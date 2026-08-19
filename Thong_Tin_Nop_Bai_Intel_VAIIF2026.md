@@ -5,8 +5,8 @@ Tài liệu này tổng hợp toàn bộ nội dung câu trả lời chuẩn hó
 ---
 
 ### 1. THÔNG TIN CHUNG VỀ DỰ ÁN (PROJECT OVERVIEW)
-* **Tên dự án (Tiếng Anh):** FlexiMind AI - Smart Active-Assistive Rehab Sleeve powered by Intel OpenVINO
-* **Tên dự án (Tiếng Việt):** FlexiMind AI - Đai nẹp đeo tay thông minh hỗ trợ phục hồi chức năng chủ động dựa trên AI tại biên
+* **Tên dự án (Tiếng Anh):** RehabArm AI: AI-Powered Active-Assistive Upper-Limb Rehabilitation
+* **Tên dự án (Tiếng Việt):** RehabArm AI - Hệ Thống Trợ Lực & Phục Hồi Chức Năng Chi Trên Chủ Động Bằng AI
 * **Lĩnh vực (Category):** AI for Accessibility & Healthcare (AI cho Y tế & Hỗ trợ người khuyết tật)
 * **Đối tượng mục tiêu (Target Users):** Bệnh nhân phục hồi sau đột quỵ/tai biến, bệnh nhân chấn thương cột sống/chi trên, người cao tuổi cần tập vật lý trị liệu tại nhà.
 
