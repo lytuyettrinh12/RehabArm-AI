@@ -1,5 +1,5 @@
 /*
- * FlexiMind AI - ESP32 Firmware
+ * RehabArm AI - ESP32 Firmware
  * 
  * Hardware Pin Connections:
  * - AD8232 sEMG Output -> GPIO 36 (VP / Analog ADC1_CH0)

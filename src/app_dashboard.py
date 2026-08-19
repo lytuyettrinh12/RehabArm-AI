@@ -22,7 +22,7 @@ from train_openvino_model import SimpleFatigueClassifier
 
 # Page Config
 st.set_page_config(
-    page_title="FlexiMind AI - Tele-Rehab Dashboard",
+    page_title="RehabArm AI - Tele-Rehab Dashboard",
     page_icon="🦾",
     layout="wide"
 )
@@ -72,8 +72,8 @@ model = load_ai_model()
 processor = SignalProcessor()
 
 # Title Header with Intel OpenVINO Badge
-st.markdown("<div class='main-header'>FlexiMind AI 🦾</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-header'>Smart Active-Assistive Rehab Sleeve powered by Intel OpenVINO</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-header'>RehabArm AI 🦾</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub-header'>Smart Bio-Assistive Upper Limb Rehab Sleeve powered by Intel OpenVINO</div>", unsafe_allow_html=True)
 device_str = getattr(model, 'device_name', 'Intel Core CPU')
 st.markdown(f"""
 <div style='text-align: center; margin-top: -10px; margin-bottom: 20px;'>

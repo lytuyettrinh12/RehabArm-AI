@@ -35,7 +35,7 @@ def build_and_export_openvino_model():
         sigmoid = ops.sigmoid(fc2)
         res = ops.result(sigmoid, name="fatigue_probability")
 
-        ov_model = ov.Model([res], [param], "FlexiMind_Intel_Fatigue_Classifier")
+        ov_model = ov.Model([res], [param], "RehabArm_Intel_Fatigue_Classifier")
         
         model_dir = os.path.dirname(os.path.abspath(__file__))
         xml_path = os.path.join(model_dir, "fatigue_model.xml")
