@@ -90,26 +90,28 @@ com_port = "COM10"
 baud_rate = 115200
 serial_conn = None
 
+@st.cache_resource
+def get_hardware_serial(port_name, baud):
+    try:
+        import serial
+        ser = serial.Serial(port_name, baud, timeout=0.05)
+        return ser
+    except Exception as e:
+        return str(e)
+
 if mode == "Hardware ESP32 Serial":
     com_port = st.sidebar.text_input("Serial COM Port:", value="COM10")
     baud_rate = st.sidebar.selectbox("Baud Rate:", [115200, 9600])
     
-    if 'serial_conn' not in st.session_state or st.session_state.serial_conn is None:
-        try:
-            import serial
-            st.session_state.serial_conn = serial.Serial(com_port, baud_rate, timeout=0.05)
-            st.sidebar.success(f"Connected to {com_port}!")
-        except Exception as e:
-            st.sidebar.error(f"Cannot open {com_port}: {e}")
-            st.session_state.serial_conn = None
-    serial_conn = st.session_state.get('serial_conn')
+    conn_obj = get_hardware_serial(com_port, baud_rate)
+    if isinstance(conn_obj, str):
+        st.sidebar.error(f"Cannot open {com_port}: {conn_obj}")
+        serial_conn = None
+    else:
+        st.sidebar.success(f"Connected to {com_port}!")
+        serial_conn = conn_obj
 else:
-    if 'serial_conn' in st.session_state and st.session_state.serial_conn is not None:
-        try:
-            st.session_state.serial_conn.close()
-        except Exception:
-            pass
-        st.session_state.serial_conn = None
+    serial_conn = None
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🏥 Physiotherapist Control")
