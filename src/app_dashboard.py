@@ -86,10 +86,30 @@ st.markdown(f"""
 st.sidebar.header("⚙️ System Settings")
 mode = st.sidebar.radio("Input Source Mode:", ["Simulated Data (Demo)", "Hardware ESP32 Serial"])
 
-com_port = "COM3"
+com_port = "COM10"
+baud_rate = 115200
+serial_conn = None
+
 if mode == "Hardware ESP32 Serial":
-    com_port = st.sidebar.text_input("Serial COM Port (e.g. COM3 / /dev/ttyUSB0):", "COM3")
+    com_port = st.sidebar.text_input("Serial COM Port:", value="COM10")
     baud_rate = st.sidebar.selectbox("Baud Rate:", [115200, 9600])
+    
+    if 'serial_conn' not in st.session_state or st.session_state.serial_conn is None:
+        try:
+            import serial
+            st.session_state.serial_conn = serial.Serial(com_port, baud_rate, timeout=0.05)
+            st.sidebar.success(f"Connected to {com_port}!")
+        except Exception as e:
+            st.sidebar.error(f"Cannot open {com_port}: {e}")
+            st.session_state.serial_conn = None
+    serial_conn = st.session_state.get('serial_conn')
+else:
+    if 'serial_conn' in st.session_state and st.session_state.serial_conn is not None:
+        try:
+            st.session_state.serial_conn.close()
+        except Exception:
+            pass
+        st.session_state.serial_conn = None
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🏥 Physiotherapist Control")
@@ -113,21 +133,19 @@ if 'fatigue_count' not in st.session_state:
 # Dashboard Layout Columns
 col1, col2, col3 = st.columns([1, 1, 1])
 
-# Simulation Data Generator
-def get_next_sample(is_simulated=True, serial_conn=None):
-    if is_simulated:
+# Data Generator
+def get_next_sample(is_simulated=True, conn=None):
+    if is_simulated or conn is None:
         # Simulate normal flexing vs fatigue over time
         t = time.time()
         is_fatigued_sim = (int(t) % 20 > 12) # Simulate fatigue every 20 seconds
         
-        # Simulate Arm Flexing (Sine Wave for Angle 0 -> 90 -> 0)
         sim_angle = abs(math.sin(t * 1.5)) * 90 
         sim_ay = 16384 * math.sin(sim_angle * math.pi / 180)
         sim_az = 16384 * math.cos(sim_angle * math.pi / 180)
 
         if is_fatigued_sim:
             raw_semg = float(np.random.normal(650, 150))
-            # If fatigued, maybe simulate spasm (rapid changes) or joint lock (no movement)
             if int(t*2) % 2 == 0:
                 sim_ay += random.randint(-8000, 8000) # Spasm
         else:
@@ -136,14 +154,21 @@ def get_next_sample(is_simulated=True, serial_conn=None):
         ax = random.randint(-500, 500)
         return raw_semg, ax, int(sim_ay), int(sim_az)
     else:
-        # Real Serial Communication logic
+        # Real Serial Communication
         try:
-            import serial
-            if serial_conn and serial_conn.in_waiting:
-                line = serial_conn.readline().decode('utf-8').strip()
-                parts = line.split(',')
-                if len(parts) >= 4:
-                    return float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3])
+            while conn.in_waiting > 0:
+                line = conn.readline().decode('utf-8', errors='ignore').strip()
+                if line:
+                    parts = line.split(',')
+                    if len(parts) >= 4:
+                        semg = float(parts[0])
+                        ax = float(parts[1])
+                        ay = float(parts[2])
+                        az = float(parts[3])
+                        # If az is nearly 0, protect atan2
+                        if abs(az) < 1 and abs(ay) < 1:
+                            az = 16384.0
+                        return semg, ax, ay, az
         except Exception:
             pass
         return 0.0, 0, 0, 16384
@@ -170,7 +195,7 @@ g3_ph = g3.empty()
 
 if run_loop:
     for i in range(1000): # Run for demo streaming
-        raw_val, ax, ay, az = get_next_sample(is_simulated=(mode == "Simulated Data (Demo)"))
+        raw_val, ax, ay, az = get_next_sample(is_simulated=(mode == "Simulated Data (Demo)"), conn=serial_conn)
         
         # Update sEMG History Buffer
         st.session_state.semg_history.pop(0)
@@ -218,24 +243,37 @@ if run_loop:
         if model is not None:
             features_input = np.array([features])
             prediction = model.predict(features_input)[0]
-            probs = model.predict_proba(features_input)[0]
-            fatigue_prob = probs[1] if len(probs) > 1 else float(prediction)
-            if fatigue_prob > fatigue_sensitivity:
+            if hasattr(model, 'predict_proba'):
+                fatigue_prob = model.predict_proba(features_input)[0][1]
+            else:
+                fatigue_prob = 0.85 if prediction == 1 else 0.15
+            if fatigue_prob >= fatigue_sensitivity:
                 fatigue_predicted = True
 
-        # Closed-loop Actuation Trigger
+        # Actuator Decision Logic
         actuator_status = "NORMAL (Servo at 0°)"
         alert_reason = ""
-        
         if fatigue_predicted or is_spasm or is_joint_lock:
             actuator_status = "⚡ EMERGENCY STOP (Servo rotated 90° - Tension Released!)"
             st.session_state.fatigue_count += 1
+            if serial_conn is not None:
+                try:
+                    serial_conn.write(b"FATIGUE\n")
+                except Exception:
+                    pass
             if is_spasm:
                 alert_reason = "SPASM / CO GIẬT ĐỘT NGỘT"
             elif is_joint_lock:
                 alert_reason = "JOINT LOCK / KẸT KHỚP (Cố sức nhưng tay không gập được)"
             else:
                 alert_reason = f"FATIGUE / MỎI CƠ (OpenVINO Confidence: {fatigue_prob*100:.1f}%)"
+        else:
+            if serial_conn is not None:
+                try:
+                    serial_conn.write(b"NORMAL\n")
+                except Exception:
+                    pass
+            alert_reason = ""
 
         # Render Live Dashboard UI (IN-PLACE UPDATES)
         m1_ph.metric("Live sEMG Signal", f"{int(raw_val)} µV")
