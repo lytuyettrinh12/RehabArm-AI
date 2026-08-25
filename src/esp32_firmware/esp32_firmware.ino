@@ -12,7 +12,7 @@
 #include <ESP32Servo.h>
 
 // Pin Definitions
-#define SEMG_PIN 36
+#define SEMG_PIN 34  // GPIO 34 (ADC1_CH6 - Clean Analog Input for sEMG)
 #define SERVO_PIN 4
 
 // MPU6050 I2C Address
