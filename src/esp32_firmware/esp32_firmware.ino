@@ -1,11 +1,17 @@
 /*
  * RehabArm AI - ESP32 Firmware
  * 
- * Hardware Pin Connections:
- * - AD8232 sEMG Output -> GPIO 36 (VP / Analog ADC1_CH0)
+ * Hardware Pin Connections (1-to-1 Direct Wiring):
+ * - AD8232 sEMG Output -> GPIO 34 (ADC1_CH6 - Clean Analog Input)
+ * - AD8232 3.3V         -> 3V3
+ * - AD8232 GND          -> GND 2
+ * - MPU6050 VCC         -> GPIO 19 (Dedicated 3.3V Power)
+ * - MPU6050 GND         -> GPIO 18 (Dedicated Mass)
  * - MPU6050 SDA         -> GPIO 21
  * - MPU6050 SCL         -> GPIO 22
  * - Servo SG90 Signal   -> GPIO 4
+ * - Servo SG90 VCC      -> VIN (5V)
+ * - Servo SG90 GND      -> GND 1
  */
 
 #include <Wire.h>
