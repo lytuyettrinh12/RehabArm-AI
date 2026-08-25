@@ -54,6 +54,13 @@ void setup() {
   tensionServo.attach(SERVO_PIN);
   tensionServo.write(0); // Initial position: Normal tension (0 degrees)
 
+  // Dedicated Power Pins for MPU6050 (Allowing 1-to-1 direct wiring)
+  pinMode(19, OUTPUT);
+  digitalWrite(19, HIGH); // GPIO 19 outputs 3.3V VCC
+  pinMode(18, OUTPUT);
+  digitalWrite(18, LOW);  // GPIO 18 acts as GND
+  delay(100);
+
   // Initialize Sensors
   pinMode(SEMG_PIN, INPUT);
   setupMPU6050();
